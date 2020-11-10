@@ -1,6 +1,9 @@
-// Programmer: Dr Anuar
-// GPL3
-pragma solidity 0.4.26;
+// Programmer: Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat
+// Project: Simple Voting
+// Website: https://github.com/iexplotech  http://blockscout.iexplotech.com, www.iexplotech.com
+// License: GPL3
+
+pragma solidity 0.5.12;
 
 contract voting {
     

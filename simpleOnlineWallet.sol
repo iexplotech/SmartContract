@@ -1,6 +1,6 @@
 // Programmer: Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat
 // Project: Simple Online Wallet DApps Tutorial 
-// Website: https://github.com/iexplotech  www.iptm.online, www.iexplotech.com
+// Website: https://github.com/iexplotech  http://blockscout.iexplotech.com, www.iexplotech.com
 // License: GPL3
 
 
@@ -34,6 +34,7 @@ contract SafeMath {
 // Simple Online Wallet DApps
 // https://github.com/iexplotech
 // ----------------------------------------------------------------------------
+// Example Pre-Deployed at Address: 0x3a1b457887fe3c24b604b0262aed4e138d96db48
 contract simpleOnlineWallet is SafeMath {
     
     address payable internal owner;

@@ -217,7 +217,7 @@ contract FixedSupplyToken is ERC20Interface, Owned {
     // Don't accept ETH
     // ------------------------------------------------------------------------
     fallback () external {
-        revert("Not Accepting Ether");
+        revert("Invalid Function Call");
     }
 
 

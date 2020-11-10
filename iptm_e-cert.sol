@@ -1,6 +1,6 @@
 // Programmer: Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat
 // Project: Sample Blockchain Based Electronic Certificate Verification System
-// Website: https://github.com/iexplotech  www.iptm.online, www.iexplotech.com
+// Website: https://github.com/iexplotech  http://blockscout.iexplotech.com, www.iexplotech.com
 // License: GPL3
 
 

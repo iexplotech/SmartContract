@@ -75,9 +75,9 @@ contract Privileged {
 
 contract IPTM_E_Certificate is Privileged {
     
+    // Event Logs
     event addedNewCertInfo(address indexed Address, string Name, string Programme, 
-                            string SemesterGraduate, string Convocation);
-                            
+                            string SemesterGraduate, string Convocation);                        
     event updatePersonalInfo(address indexed Address, string Name, string NRIC);
 
     // university

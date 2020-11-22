@@ -1,5 +1,6 @@
 // Programmer: Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat
 // Project: Sample Blockchain Based Electronic Certificate Verification System
+// Collaboration: Institusi Pendidikan Tinggi Malaysia (IPTM) Blockchain Testnet
 // Website: https://github.com/iexplotech  http://blockscout.iexplotech.com, www.iexplotech.com
 //"SPDX-License-Identifier: GPL3"
 
@@ -15,17 +16,17 @@ contract Privileged {
     
     bool verifiedSmartContract; // true if this smart contract passed verification by IPTM_Verifier
     
-    modifier onlyOwner {
+    modifier onlyOwner { // University
         require(msg.sender == owner);
         _;
     }
     
-    modifier onlyIPTM_Verifier {
+    modifier onlyIPTM_Verifier { // Smart Contract Verifier: CyberSecurity Malaysia & iExploTech
         require(msg.sender == IPTM_Verifier);
         _;
     }
     
-    modifier onlyRegistrar {
+    modifier onlyRegistrar { // University
         require(msg.sender == registrar);
         _;
     }
@@ -95,6 +96,7 @@ contract IPTM_E_Certificate is Privileged {
     
     mapping (address=>certificate) internal gradCert;
     mapping (address=>personal) internal myPersonal;
+    mapping (address=>bool) internal userUpdateRestriction;
     
     constructor () public {
         
@@ -107,6 +109,8 @@ contract IPTM_E_Certificate is Privileged {
         gradCert[newAddress].programme = newProgramme;
         gradCert[newAddress].semesterGraduate = newSemesterGraduate;
         gradCert[newAddress].convocation = newConvocation;
+        
+        userUpdateRestriction[newAddress] = true; // lock user account form updating their Personal Info 
         
         emit addedNewCertInfo(newAddress, newName, newProgramme, newSemesterGraduate, newConvocation);
     }
@@ -126,6 +130,10 @@ contract IPTM_E_Certificate is Privileged {
     
     // Only User can write/update their Name & NIRC
     function setMyPersonalInfo(string memory newName, string memory newNRIC) public {
+        
+        if(userUpdateRestriction[msg.sender] == true) // revert() uses for rollback to original state & exit
+            revert("You are no longer authorized to update you personal data. Certificate already generated!");  
+        
         myPersonal[msg.sender].name = newName;
         myPersonal[msg.sender].NRIC= newNRIC;
         

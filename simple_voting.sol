@@ -50,8 +50,8 @@ contract IPTM_Voting {
         // This section for Debug (D)
         D_candidate_01 = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2; // Address JavaScript VM, Remix Ide
         D_candidate_02 = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db; // Address JavaScript VM, Remix Ide
-        D_setAllVoters ();
-        D_setAllCandidates ();
+        D_setAllVoters();
+        D_setAllCandidates();
     }
     
     function addVoter(string memory newName, uint128 newMemberIC, uint128 newMemberID)
@@ -95,7 +95,7 @@ contract IPTM_Voting {
         myVoter[newAddress].voteCasted = false;
     }
     
-    function D_setAllVoters () public {
+    function D_setAllVoters() public {
         D_setVoter(D_candidate_01, "V1", 11, 11); // voter 1 & Candidate01, Address JavaScript VM
         D_setVoter(D_candidate_02, "V2", 22, 22); // voter 2 & Candidate02, Address JavaScript VM
         D_setVoter(0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB, "V3", 33, 33); // voter 3, Address JavaScript VM
@@ -112,7 +112,7 @@ contract IPTM_Voting {
         myCandidate[newAddress].candidateTotalVotes = 0;
     }
     
-    function D_setAllCandidates () public {
+    function D_setAllCandidates() public {
         D_addCandidate(D_candidate_01, "Candidate01_Anuar", 11, 11); // Candidate 1, Anuar Isa
         D_addCandidate(D_candidate_02, "Candidate02_Anwar", 22, 22); // Candidate 2, Anwar Ibrahim
     }

@@ -1,10 +1,10 @@
 // Programmer: Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat
 // Project: Sample Blockchain Based Electronic Certificate Verification System
 // Website: https://github.com/iexplotech  http://blockscout.iexplotech.com, www.iexplotech.com
-// License: GPL3
+//"SPDX-License-Identifier: GPL3"
 
 
-pragma solidity ^0.5.12;
+pragma solidity ^0.6.12;
 
 contract Privileged {
     
@@ -31,18 +31,17 @@ contract Privileged {
     }
     
     constructor () public {
-        owner = msg.sender;
-        //IPTM_Verifier = 0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C; // Simulate on Remix VM
-        //registrar  = 0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB; // Simulate on Remix VM
+        owner = msg.sender; // The one post this contract into Blockchain
         
-        IPTM_Verifier = 0x80Ce17271FfA4a7F66E2cbF3561a6946587F470D; // Run on IPTM Blockchain
-        registrar  = 0xcC2Fb9D68140CAEA8D29B9E51bd0f24bbD1b071A; // Run on IPTM Blockchain
+        // Run on IPTM Blockchain
+        IPTM_Verifier = 0x0000706E899d0f46c5EFE22c4CAaEb885af4dcAc;  // you may change to another address
+        registrar  = owner; // you may change to another address
         
         verifiedSmartContract = false;
     }
     
     function whoAmI() public view returns (address) {
-        return msg.sender;
+        return msg.sender; // msg.sender is the one that run the contract now!.. your account
     }
     
     function whoSmartContractVerifier() public view returns (address) {
@@ -51,6 +50,10 @@ contract Privileged {
     
     function whoOwner() public view returns (address) {
         return owner;
+    }
+    
+    function setRegistrar(address newAddress) public onlyOwner {
+        registrar = newAddress;
     }
     
     function whoRegistrar() public view returns (address) {
@@ -65,12 +68,17 @@ contract Privileged {
         return verifiedSmartContract;
     }
     
-    function kill() public onlyOwner {
+    function kill() public onlyOwner {  // Terminate this contract
             selfdestruct(owner);
     }
 }
 
 contract IPTM_E_Certificate is Privileged {
+    
+    event addedNewCertInfo(address indexed Address, string Name, string Programme, 
+                            string SemesterGraduate, string Convocation);
+                            
+    event updatePersonalInfo(address indexed Address, string Name, string NRIC);
 
     // university
     struct certificate {
@@ -92,31 +100,39 @@ contract IPTM_E_Certificate is Privileged {
         
     }
     
+    // Only Registrar have permission to write cert info
     function setCertInfo(address newAddress, string memory newName, string memory  newProgramme, 
                             string memory  newSemesterGraduate, string memory  newConvocation) public onlyRegistrar {
         gradCert[newAddress].name = newName;
         gradCert[newAddress].programme = newProgramme;
         gradCert[newAddress].semesterGraduate = newSemesterGraduate;
         gradCert[newAddress].convocation = newConvocation;
+        
+        emit addedNewCertInfo(newAddress, newName, newProgramme, newSemesterGraduate, newConvocation);
     }
     
-    function getCertInfo(address newAddress) public onlyRegistrar view returns (string memory, string memory, 
+    // Everyone can read cert info
+    function getCertInfo(address newAddress) public view returns (string memory, string memory, 
                             string memory, string memory) {
         return(gradCert[newAddress].name, gradCert[newAddress].programme, gradCert[newAddress].semesterGraduate, 
                 gradCert[newAddress].convocation);
     }
     
+    // User can read their cert info
     function getMyCertInfo() public view returns (string memory, string memory, string memory, string memory) {
         return(gradCert[msg.sender].name, gradCert[msg.sender].programme, gradCert[msg.sender].semesterGraduate, 
                 gradCert[msg.sender].convocation);
     }
     
+    // Only User can write/update their Name & NIRC
     function setMyPersonalInfo(string memory newName, string memory newNRIC) public {
         myPersonal[msg.sender].name = newName;
         myPersonal[msg.sender].NRIC= newNRIC;
-
+        
+        emit updatePersonalInfo(msg.sender, newName, newNRIC);
     }
     
+    // User can read their Name & NIRC
     function getMyPersonalInfo() public view returns (string memory, string memory){
         return(myPersonal[msg.sender].name, myPersonal[msg.sender].NRIC);
     }
@@ -125,22 +141,16 @@ contract IPTM_E_Certificate is Privileged {
         return(myPersonal[newAddress].name, myPersonal[newAddress].NRIC);
     }
     
-    
-    
     // Testing and Debuging Functions
     function setDebugPersonalInfo () public {
          setMyPersonalInfo("MOHD ANUAR BIN MAT ISA", "820716001234");
     }
     
     function setDebugCertInfo(address newAddress) public onlyRegistrar {
-        gradCert[newAddress].name = "MOHD ANUAR BIN MAT ISA";
-        gradCert[newAddress].programme = "DOCTOR OF PHILOSOPHY IN ELECTRICAL ENGINEERING";
-        gradCert[newAddress].semesterGraduate = "Session 1 2018/2019";
-        gradCert[newAddress].convocation = "MARCH 2019";
+        setCertInfo(newAddress, "MOHD ANUAR BIN MAT ISA", "DOCTOR OF PHILOSOPHY IN ELECTRICAL ENGINEERING", "Session 1 2018/2019", "MARCH 2019");
     }
     
     function setDebugSmartContractVerification () public onlyIPTM_Verifier {
         setSmartContractVerification (true);
     }
 }
-

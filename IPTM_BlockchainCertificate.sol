@@ -1,4 +1,4 @@
-// Programmer: Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat, 2021
+// Programmer: Ts. Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat, 2021
 // Contact: anuarls@hotmail.com
 // Project: Blockchain Digital Certificate for IPT Malaysia, 2021
 // Collaboration: Institusi Pendidikan Tinggi Malaysia (IPTM) Blockchain Testnet 2021
@@ -104,6 +104,7 @@ contract Library {
 // GAS LIMIT: 7000000
 // EVM VERSION: istanbul
 // Enable optimization: 200
+// Latest Deployed Address: 0x4B2930233825bF05e2c9430daf94C97d6e7714B6  // Your address will be different!
 contract IPTM_BlockchainCertificate is AccessControl, Library {
     
     // Event Logs
@@ -128,8 +129,10 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
     string internal tempLatestCertNo;  // Pointer to the latest added CertNo, use for backward travesal searching Cert
     
     constructor() public {
-        owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;
-        registrar = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
+        //owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;  // Remix IDE
+        //registrar = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;  // Remix IDE
+        owner = 0x80Ce17271FfA4a7F66E2cbF3561a6946587F470D;  // IPTM Testnet Single
+        registrar = 0x188834ca6e9934F40C6d7bE119a241159ad092C7;  // IPTM Testnet Single
         contractName = "Blockchain Digital Certificate for IPT Malaysia, 2021";
         systemDeveloper = "iExploTech, IPTM Secretariat, 2021";
         totalMapCert = 0;

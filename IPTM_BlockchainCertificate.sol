@@ -429,6 +429,8 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
     
     // Delete All Certificates - Hell yeah!
     // May hangup in Remix IDE if too many Certificates
+    // if Gas required exceeds allowance (8000000), you cannot run this function. Too many write operation in blockchain
+    // Delete one by one certificate if exceeds allowance gas
     function DebugDeleteAllCertificate() public onlyRegistrar {
         
         string memory index = tempFirstCertNo;

@@ -1,39 +1,53 @@
 // Programmer: Ts. Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat, 2021
 // Contact: anuarls@hotmail.com
-// Project: Blockchain Digital Certificate for IPT Malaysia, 2021
-// Collaboration: Institusi Pendidikan Tinggi Malaysia (IPTM) Blockchain Testnet 2021
+// Project: Blockchain Digital Certificate for IPT Malaysia, 2022
+// Collaboration: Institusi Pendidikan Tinggi Malaysia (IPTM) Blockchain Testnet 2022
 // Website: https://github.com/iexplotech  http://blockscout.iexplotech.com, www.iexplotech.com
 // Smart Contract Name: IPTM_BlockchainCertificate
-// Date: 24 May 2021
-// Version: 1.0.1
+// Date: 28 March 2022
+// Version: 1.1.0
 // Notice: Any referrence, usage or modification of this smart contract without a proper citation (reference) 
 //         is considured as plagarism!. Dear Student, do citation - it is a part of learning.
 // "SPDX-License-Identifier: GPL-3.0-or-later"
 
-pragma solidity ^0.6.12;
+//pragma solidity ^0.6.12;
+pragma solidity ^0.7.6;
 
 contract AccessControl {
     address payable internal owner;
     address internal registrar;
+    address internal trustedAgent;
     string contractName;
     string systemDeveloper;
     
     // onlyOwner can deploy and destroy contract;
     modifier onlyOwner {
-        require(msg.sender == owner, "onlyOwner Authorized!");
+        require(msg.sender == owner, "onlyOwner is Authorized!");
         _;
     }
-    // onlyRegistrar can write, update, delete data
+    // onlyRegistrar can write, read, update, delete all data
     modifier onlyRegistrar {
-        require(msg.sender == registrar, "onlyRegistrar Authorized!");
+        require(msg.sender == registrar, "onlyRegistrar is Authorized!");
+        _;
+    }
+    // onlyTrustedAgent can read all data
+    modifier onlyTrustedAgent {
+        require(msg.sender == trustedAgent, "onlyTrustedAgent is Authorized!");
+        _;
+    }
+    // onlyRegistrar or onlyTrustedAgent can read all data
+    modifier onlyRegistrar_or_onlyTrustedAgent {
+        if(msg.sender != registrar || msg.sender != trustedAgent)
+            revert("onlyRegistrar or onlyTrustedAgent is Authorized!");
         _;
     }
     
     function getContractInfo() public view returns (address Owner, address ContractAddress, 
-        string memory ContractName, address Registrar, string memory SystemDeveloper) {
-        return (owner, address(this), contractName, registrar, systemDeveloper);
+        string memory ContractName, address Registrar, address TrustedAgent, string memory SystemDeveloper) {
+        return (owner, address(this), contractName, registrar, trustedAgent, systemDeveloper);
     }
     
+    // Contract is no longer accessible, but all certificate records still in blockchain
     function kill() public onlyOwner {
         selfdestruct(owner);
     }
@@ -104,7 +118,7 @@ contract Library {
 // GAS LIMIT: 7000000
 // EVM VERSION: istanbul
 // Enable optimization: 200
-// Latest Deployed Address: 0x4B2930233825bF05e2c9430daf94C97d6e7714B6  // Your address will be different!
+// Latest Deployed Address: 0x7224a0ed70d46b53edc5791389e4c6a9a93d01fa  // Your address will be different!
 contract IPTM_BlockchainCertificate is AccessControl, Library {
     
     // Event Logs
@@ -127,14 +141,18 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
     uint256 internal totalMapCert;  // Total Counter Added CertNo
     string internal tempFirstCertNo;  // Pointer to the first added CertNo, use for forward travesal searching Cert
     string internal tempLatestCertNo;  // Pointer to the latest added CertNo, use for backward travesal searching Cert
-    
-    constructor() public {
-        //owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;  // Remix IDE
-        //registrar = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;  // Remix IDE
-        owner = 0x80Ce17271FfA4a7F66E2cbF3561a6946587F470D;  // IPTM Testnet Single
-        registrar = 0x188834ca6e9934F40C6d7bE119a241159ad092C7;  // IPTM Testnet Single
-        contractName = "Blockchain Digital Certificate for IPT Malaysia, 2021";
-        systemDeveloper = "iExploTech, IPTM Secretariat, 2021";
+    uint256 internal lastUpdate;  // Time when lastime certificate was added, update or remove. Unix Timestamp. Applicable for caching certiface records.
+
+    //constructor() public {
+    constructor() {
+        owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;  // Remix IDE
+        registrar = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;  // Remix IDE
+        trustedAgent = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db;   // Remix IDE
+        //owner = 0x188834ca6e9934F40C6d7bE119a241159ad092C7;  // IPTM Testnet Single 2021
+        //registrar = 0xE0feB70159cD53c8d717659d89B33Bf3D0fc7ec1;  // IPTM Testnet Single 2021
+        //trustedAgent = 0x66d834b07e01746F294530948f08d23c9C96f34a;   // IPTM Testnet Single 2021
+        contractName = "Blockchain Digital Certificate for IPT Malaysia, 2022";
+        systemDeveloper = "iExploTech, IPTM Secretariat, 2022";
         totalMapCert = 0;
         tempFirstCertNo = "";
         tempLatestCertNo = "";
@@ -171,11 +189,13 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
         tempLatestCertNo = _certNo; // Set existing Cert No as reference for future new addCertificate()
         totalMapCert += 1;
         
+        lastUpdate = block.timestamp;
         emit addedCertificate(_certNo);  // Event Log
         
         return true;
     }
-    
+
+    // Public will use this function to verify a certificate
     function readCertificatePublic(string memory _certNo) public view returns (
         string memory CertNo, string memory Name, string memory Programme, string memory ConvoDate) {
         
@@ -186,7 +206,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
             return (_certNo, mapCert[_certNo].name, mapCert[_certNo].programme, mapCert[_certNo].convoDate);
     }
     
-    function readCertificateOnlyRegistrar(string memory _certNo) public view onlyRegistrar returns (
+    function readCertificate(string memory _certNo) public view onlyRegistrar_or_onlyTrustedAgent returns (
         string memory Name, string memory IC, string memory _StudentId, string memory Programme, 
         string memory ConvoDate, string memory SemesterFinish) {
             
@@ -198,7 +218,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
                 mapCert[_certNo].programme, mapCert[_certNo].convoDate, mapCert[_certNo].semesterFinish);
     }
     
-     function searchCertificateOnlyRegistrar(string memory _certNo) public view onlyRegistrar returns (
+     function searchCertificate(string memory _certNo) public view onlyRegistrar_or_onlyTrustedAgent returns (
         string memory CertData, string memory PrevCertNo, string memory NextCertNo) {
         
          // if studentId is empty, then CertNo not exist
@@ -219,8 +239,8 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
             return (true);
     }
     
-    function searchDataOnlyRegistrar(string memory _searchValue, string memory _searchType, 
-        string memory _searchIndex) public view onlyRegistrar returns (string memory CertData, 
+    function searchData(string memory _searchValue, string memory _searchType, 
+        string memory _searchIndex) public view onlyRegistrar_or_onlyTrustedAgent returns (string memory CertData, 
         string memory NextCertNo, bool Status, string memory Message) {
             
         if(totalMapCert == 0) {  // Empty List Cert
@@ -301,6 +321,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
         mapCert[_certNo].convoDate = _convoDate;
         mapCert[_certNo].semesterFinish = _semesterFinish;
         
+        lastUpdate = block.timestamp;
         emit updatedCertificate(_certNo);  // Event Log
         
         return true;
@@ -339,16 +360,17 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
             delete mapCert[_certNo];
             totalMapCert -= 1;  // deduct cert counter
             
+            lastUpdate = block.timestamp;
             emit deletedCertificate(_certNo);  // Event Log
             
             return (true);
         }
     }
     
-    function getListCertificateStatus() public view onlyRegistrar returns (string memory FirstCertNo, 
-        string memory LatestCertNo, uint256 TotalMapCert) {
+    function getListCertificateStatus() public view onlyRegistrar_or_onlyTrustedAgent returns (string memory FirstCertNo, 
+        string memory LatestCertNo, uint256 TotalMapCert, uint256 LastUpdate) {
             
-        return (tempFirstCertNo, tempLatestCertNo, totalMapCert);
+        return (tempFirstCertNo, tempLatestCertNo, totalMapCert, lastUpdate);
     }
 
     /*
@@ -368,23 +390,23 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
     Executes DebugAddCertificate() 5 times to push 5 dummy certs
     
     Step 3: Check Cert List
-    Run as Registrar address
+    Run as Registrar or Trusted Agent address
     Executes getListCertificateStatus()
     
     Step 4: Search Cert
-    Run as Registrar address
+    Run as Registrar or Trusted Agent address
     Executes:
-    4.1. searchDataOnlyRegistrar() as the following params:
+    4.1. searchData() as the following params:
     _searchValue: IC_3
     _searchType: ic
     _searchIndex:  <empty without value> for advance indexed search, put CertNo
     
-    4.2. searchDataOnlyRegistrar() as the following params:
+    4.2. searchData() as the following params:
     _searchValue: StudentId_2
     _searchType: id
     _searchIndex:  <empty without value> for advance indexed search, put CertNo
     
-    4.3. searchDataOnlyRegistrar() as the following params:
+    4.3. searchData() as the following params:
     _searchValue: Name_4
     _searchType: name
     _searchIndex:  <empty without value> for advance indexed search, put CertNo

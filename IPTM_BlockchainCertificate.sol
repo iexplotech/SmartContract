@@ -10,7 +10,6 @@
 //         is considured as plagarism!. Dear Student, do citation - it is a part of learning.
 // "SPDX-License-Identifier: GPL-3.0-or-later"
 
-//pragma solidity ^0.6.12;
 pragma solidity ^0.7.6;
 
 contract AccessControl {
@@ -37,9 +36,10 @@ contract AccessControl {
     }
     // onlyRegistrar or onlyTrustedAgent can read all data
     modifier onlyRegistrar_or_onlyTrustedAgent {
-        if(msg.sender != registrar || msg.sender != trustedAgent)
-            revert("onlyRegistrar or onlyTrustedAgent is Authorized!");
-        _;
+        if(msg.sender == registrar || msg.sender == trustedAgent)
+            _;
+        else revert("onlyRegistrar or onlyTrustedAgent is Authorized!");
+        
     }
     
     function getContractInfo() public view returns (address Owner, address ContractAddress, 
@@ -143,7 +143,6 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
     string internal tempLatestCertNo;  // Pointer to the latest added CertNo, use for backward travesal searching Cert
     uint256 internal lastUpdate;  // Time when lastime certificate was added, update or remove. Unix Timestamp. Applicable for caching certiface records.
 
-    //constructor() public {
     constructor() {
         owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;  // Remix IDE
         registrar = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;  // Remix IDE

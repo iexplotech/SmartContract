@@ -7,7 +7,7 @@
 // Date: 25 August 2022
 // Version: 1.1.1
 // Notice: Any referrence, usage or modification of this smart contract without a proper citation (reference) 
-//         is considured as plagarism!. Dear Student, do citation - it is a part of learning.
+//         is considered as plagarism!. Dear Student, do citation - it is a part of learning.
 // "SPDX-License-Identifier: GPL-3.0-or-later"
 
 pragma solidity ^0.7.6;

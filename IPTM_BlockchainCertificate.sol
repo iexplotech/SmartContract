@@ -1,11 +1,11 @@
 // Programmer: Ts. Dr. Mohd Anuar Mat Isa, iExplotech & IPTM Secretariat, 2021
 // Contact: anuarls@hotmail.com
-// Project: Blockchain Digital Certificate for IPT Malaysia, 2022
+// Project: Blockchain Digital Certificate Verification for IPT Malaysia, 2022
 // Collaboration: Institusi Pendidikan Tinggi Malaysia (IPTM) Blockchain Testnet 2022
 // Website: https://github.com/iexplotech  http://blockscout.iexplotech.com, www.iexplotech.com
 // Smart Contract Name: IPTM_BlockchainCertificate
-// Date: 28 March 2022
-// Version: 1.1.0
+// Date: 25 August 2022
+// Version: 1.1.1
 // Notice: Any referrence, usage or modification of this smart contract without a proper citation (reference) 
 //         is considured as plagarism!. Dear Student, do citation - it is a part of learning.
 // "SPDX-License-Identifier: GPL-3.0-or-later"
@@ -112,6 +112,17 @@ contract Library {
             return 0;
         }
     }
+
+    // Safe Maths
+    function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
+        c = a + b;
+        require(c >= a, "Overflow Add Operation");
+    }
+
+    function sub(uint256 a, uint256 b) internal pure returns (uint256 c) {
+        require(b <= a, "Underflow Subtraction Operation");
+        c = a - b;
+    }
 }
 
 // Deployed on Remix IDE 
@@ -126,6 +137,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
     event updatedCertificate(string CertificateNo);
     event deletedCertificate(string CertificateNo);
 	
+    // Certificate No is used as the index. Therefore it is data redundant to add it into this struct
     struct Certificate {
         string name;
         string ic;
@@ -155,6 +167,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
         totalMapCert = 0;
         tempFirstCertNo = "";
         tempLatestCertNo = "";
+        lastUpdate = block.timestamp;
     }
 
     function addCertificate(string memory _certNo, string memory _name, string memory _ic, 
@@ -186,7 +199,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
         }
 
         tempLatestCertNo = _certNo; // Set existing Cert No as reference for future new addCertificate()
-        totalMapCert += 1;
+        totalMapCert = add(totalMapCert, 1);
         
         lastUpdate = block.timestamp;
         emit addedCertificate(_certNo);  // Event Log
@@ -357,7 +370,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
             }
             
             delete mapCert[_certNo];
-            totalMapCert -= 1;  // deduct cert counter
+            totalMapCert = sub(totalMapCert, 1);  // deduct cert counter
             
             lastUpdate = block.timestamp;
             emit deletedCertificate(_certNo);  // Event Log
@@ -423,7 +436,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
     */
         
     
-    
+    // DEBUG SECTION
     // Debuging Functions - If you are lazy to type long inputs
     // For Production or Pilot Deployment, You must remove these debug functions
     // Add Dummy Cert

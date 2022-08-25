@@ -13,9 +13,14 @@
 pragma solidity ^0.7.6;
 
 contract AccessControl {
-    address payable internal owner;
-    address internal registrar;
-    address internal trustedAgent;
+
+    // Event Logs
+    event _ChangeTrustedAgent(address TrustedAgent);
+
+    address internal deployer; // who deploys this smartcontract into blockchain
+    address payable internal owner;  // who owner this smartcontract
+    address internal registrar; // who can write, read, update, delete all certificates
+    address internal trustedAgent; // who can read all certificates - for webserver
     string contractName;
     string systemDeveloper;
     
@@ -42,9 +47,14 @@ contract AccessControl {
         
     }
     
-    function getContractInfo() public view returns (address Owner, address ContractAddress, 
-        string memory ContractName, address Registrar, address TrustedAgent, string memory SystemDeveloper) {
-        return (owner, address(this), contractName, registrar, trustedAgent, systemDeveloper);
+    function GetContractInfo() public view returns (string memory ContractName, address ContractAddress, 
+        address Deployer, address Owner, address Registrar, address TrustedAgent, string memory SystemDeveloper) {
+        return (contractName, address(this), deployer, owner, registrar, trustedAgent, systemDeveloper);
+    }
+
+    function ChangeTrustedAgent(address _trustedAgent) public onlyOwner {
+        trustedAgent = _trustedAgent;
+        emit _ChangeTrustedAgent(trustedAgent);
     }
     
     // Contract is no longer accessible, but all certificate records still in blockchain
@@ -156,6 +166,7 @@ contract IPTM_BlockchainCertificate is AccessControl, Library {
     uint256 internal lastUpdate;  // Time when lastime certificate was added, update or remove. Unix Timestamp. Applicable for caching certiface records.
 
     constructor() {
+        deployer = msg.sender;
         owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;  // Remix IDE
         registrar = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;  // Remix IDE
         trustedAgent = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db;   // Remix IDE
